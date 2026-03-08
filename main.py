@@ -346,29 +346,25 @@ def cinematique_differentielle_B(theta_1, theta_2, theta_3, theta_4, theta_5, th
         print(matrice_vitesse_angle)
 
 def cinematique_differentielle_C(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6):
-    print(theta_1, theta_2)
-    if theta_1 == 0 or theta_2 == 0:
-        _, matrice_jacobienne_C = matrice_jacobienne(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
+    _, matrice_jacobienne_C = matrice_jacobienne(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
 
-        matrice_JT_J = matrice_jacobienne_C.T @ matrice_jacobienne_C
+    matrice_JT_J = matrice_jacobienne_C.T @ matrice_jacobienne_C
 
-        det_matrice_JT_J = np.linalg.det(matrice_JT_J)
+    det_matrice_JT_J = np.linalg.det(matrice_JT_J)
 
-        r = np.array([
-            [0],
-            [1],
-            [0]
-        ])
+    r = np.array([
+        [0],
+        [1],
+        [0]
+    ])
 
-        if det_matrice_JT_J == 0:
-            print("sig")
-            print(f"matrice_jacobienne_B: \n{matrice_JT_J}")
-        else:
-            matrice_vitesse_angle = np.linalg.inv(matrice_JT_J) @ matrice_JT_J.T @ r
-            print(matrice_vitesse_angle)
-
+    if det_matrice_JT_J == 0:
+        print("sig")
+        print(f"matrice_jacobienne_B: \n{matrice_JT_J}")
     else:
-        print("theta 1 and theta 2 have to be 0")
+        matrice_vitesse_angle = np.linalg.inv(matrice_JT_J) @ matrice_JT_J.T @ r
+        print(np.round(matrice_vitesse_angle, 10))
+
 
 def main():
     # Angles articulaires (rad) pour test cinematique
