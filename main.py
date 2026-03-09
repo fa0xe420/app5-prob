@@ -370,7 +370,7 @@ def cinematique_differentielle_C(theta_1, theta_2, theta_3, theta_4, theta_5, th
 def main():
     # Angles articulaires (rad) pour test cinematique
     # theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
-    # theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = 0, 0, 0, 0, 0, 0
+    # # theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = 0, 0, 0, 0, 0, 0
 
     # matrice_final, pt_t = cinematique(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
     # print(f"Le point d'outil au frame w: {pt_t}")
@@ -379,8 +379,8 @@ def main():
     # analyse_tranche()
 
     # Angles articulaires (rad) pour test cinematique diff
-    theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = -0.4, -1.2, 0, 0, -0.3708, 0
-    # theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = 0, 0, 1.521, 0, 0, 0
+    # theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = -0.4, -1.2, 0, 0, -0.3708, 0
+    theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = 0, 0, 1.521, 0, 0, 0
     vitesse = 1
     cinematique_differentielle_A(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6, vitesse)
     cinematique_differentielle_B(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6, vitesse)
