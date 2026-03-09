@@ -151,16 +151,16 @@ def analyse_tranche():
 
     # Vérification 0.2°
     if np.abs(theta_theorique - theta_measure) <= 0.2:
-        print("pass 0.2")
+        print(f"différence d'angle: {theta_theorique - theta_measure}\nTest de 0.2° réussi")
     else:
-        print("failed 0.2")
+        print(f"différence d'angle: {theta_theorique - theta_measure}\nTest de 0.2° échoué")
 
     # Vérification ±1 mm
     # print(b)    # 0.10125892090668703
     if np.abs(b - hg) <= 0.001:
-        print("passed ± 1mm")
+        print(f"différence d'hauteur: {b - hg}\nTest de ±1 mm réussi")
     else:
-        print("failed ± 1mm")
+        print(f"différence d'hauteur: {b - hg}\nTest de ±1 mm échoué")
 
     # DF
     matrice_r_p_DFiwP = np.stack((r_p_DF1wP, r_p_DF2wP, r_p_DF3wP, r_p_DF4wP, r_p_DF5wP))
@@ -170,7 +170,7 @@ def analyse_tranche():
         y = matrice_r_p_DFiwP[i, 1]
 
         if verifie_zone(x, y):
-            print(f"DF{i}: ({x}, {y}), bad")
+            print(f"Défaut détecté: DF{i}: ({x}, {y})")
 
     df_x = np.array([r_p_DF1wP[0,0], r_p_DF2wP[0,0], r_p_DF3wP[0,0], r_p_DF4wP[0,0], r_p_DF5wP[0,0]])
     df_y = np.array([r_p_DF1wP[1,0], r_p_DF2wP[1,0], r_p_DF3wP[1,0], r_p_DF4wP[1,0], r_p_DF5wP[1,0]])
@@ -274,7 +274,7 @@ def cinematique(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6):
 
 def dessiner_3D(matrice_final):
     fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
+    ax = fig.add_subplot(111, projection='3d')
 
     Xs = matrice_final[0, :]
     Ys = matrice_final[1, :]
@@ -286,6 +286,7 @@ def dessiner_3D(matrice_final):
     ax.set_ylabel("z")
     ax.set_zlabel("y")
     ax.grid(True)
+    ax.set_aspect('equal')
     plt.show()
 
 def matrice_jacobienne(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6):
@@ -317,35 +318,34 @@ def matrice_jacobienne(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6):
 
     return matrice_jacobienne_A, matrice_jacobienne_BC
 
-def cinematique_differentielle_A(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6):
+def cinematique_differentielle_A(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6, vitesse):
     matrice_jacobienne_A, _ = matrice_jacobienne(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
-    matrice_vitesse = np.array([[1]])
+    matrice_vitesse = np.array([[vitesse]])
 
     # pas de l'inversion car c'est matrice de 1x1
     matrice_pseudo_inverse = matrice_jacobienne_A.T @ (matrice_jacobienne_A @ matrice_jacobienne_A.T)
     matrice_vitesse_angle = matrice_pseudo_inverse @ matrice_vitesse
 
-    print(f"matrice_vitesse_angle: \n{matrice_vitesse_angle}")
+    print(f"Situation 1: matrice de vitesse angulaire: \n{matrice_vitesse_angle}")
 
 
-def cinematique_differentielle_B(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6):
+def cinematique_differentielle_B(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6, vitesse):
     _, matrice_jacobienne_B = matrice_jacobienne(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
     r = np.array([
         [0],
-        [1],
+        [vitesse],
         [0]
     ])
 
     det_matrice_jacobienne_B = np.linalg.det(matrice_jacobienne_B)
 
     if det_matrice_jacobienne_B == 0:
-        print("sig")
-        print(f"matrice_jacobienne_B: \n{matrice_jacobienne_B}")
+        print("Erreur, determinant de matrice jacobienne égale à 0")
     else:
         matrice_vitesse_angle = np.linalg.inv(matrice_jacobienne_B) @ r
-        print(matrice_vitesse_angle)
+        print(f"Situation 2: matrice de vitesse angulaire: \n{matrice_vitesse_angle}")
 
-def cinematique_differentielle_C(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6):
+def cinematique_differentielle_C(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6, vitesse):
     _, matrice_jacobienne_C = matrice_jacobienne(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
 
     matrice_JT_J = matrice_jacobienne_C.T @ matrice_jacobienne_C
@@ -354,35 +354,37 @@ def cinematique_differentielle_C(theta_1, theta_2, theta_3, theta_4, theta_5, th
 
     r = np.array([
         [0],
-        [1],
+        [vitesse],
         [0]
     ])
 
     if det_matrice_JT_J == 0:
-        print("sig")
-        print(f"matrice_jacobienne_B: \n{matrice_JT_J}")
+        print("Erreur, determinant de matrice jacobienne égale à 0")
     else:
         matrice_vitesse_angle = np.linalg.inv(matrice_JT_J) @ matrice_JT_J.T @ r
-        print(np.round(matrice_vitesse_angle, 10))
+        round = np.round(matrice_vitesse_angle, 10)
+        print(f"Situation 3: matrice de vitesse angulaire arrondie: \n{round}")
+        print(f"Situation 3: matrice de vitesse angulaire non-arrondie: \n{matrice_vitesse_angle}")
 
 
 def main():
     # Angles articulaires (rad) pour test cinematique
-    theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
+    # theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = 0.1, 0.1, 0.1, 0.1, 0.1, 0.1
     # theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = 0, 0, 0, 0, 0, 0
 
-    matrice_final, pt_t = cinematique(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
-    print(pt_t)
+    # matrice_final, pt_t = cinematique(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
+    # print(f"Le point d'outil au frame w: {pt_t}")
 
-    dessiner_3D(matrice_final)
-    analyse_tranche()
+    # dessiner_3D(matrice_final)
+    # analyse_tranche()
 
     # Angles articulaires (rad) pour test cinematique diff
-    # theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = -0.4, -1.2, 0, 0, -0.3708, 0
+    theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = -0.4, -1.2, 0, 0, -0.3708, 0
     # theta_1, theta_2, theta_3, theta_4, theta_5, theta_6 = 0, 0, 1.521, 0, 0, 0
-    # cinematique_differentielle_A(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
-    # cinematique_differentielle_B(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
-    # cinematique_differentielle_C(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6)
+    vitesse = 1
+    cinematique_differentielle_A(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6, vitesse)
+    cinematique_differentielle_B(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6, vitesse)
+    cinematique_differentielle_C(theta_1, theta_2, theta_3, theta_4, theta_5, theta_6, vitesse)
 
 
 main()
